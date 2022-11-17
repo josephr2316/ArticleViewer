@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "691546696962",
+    "project_id": "articleviewer-30b2a",
+    "storage_bucket": "articleviewer-30b2a.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:691546696962:android:19f6b0b589e45a9f63661b",
+        "android_client_info": {
+          "package_name": "com.pucmm.articleviewer"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "691546696962-jer9geqba77c9e7qb5ql3382ha5iohsg.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAlLbPRah_n8Pg_6WFPIt_9oq7jCAo1fYA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "691546696962-jer9geqba77c9e7qb5ql3382ha5iohsg.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
