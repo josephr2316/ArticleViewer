@@ -24,11 +24,10 @@
 
             <ImageView
                 android:id="@+id/image_cardview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="100dp"
+                android:layout_height="100dp"
                 android:layout_marginTop="16dp"
                 android:contentDescription="TODO"
-                android:src="@drawable/ic_baseline_add_circle_24"
                 app:layout_constraintBottom_toTopOf="@+id/description_cardview"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
