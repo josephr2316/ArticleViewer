@@ -65,6 +65,7 @@ public class AddItem extends Fragment {
     private StorageReference storageReference;
     ArticleViewModel articleViewModel;
     int positionImage;
+    AlertDialog.Builder builder;
 
 
 
@@ -237,16 +238,30 @@ public class AddItem extends Fragment {
 
         });
         binding.deleteBt.setOnClickListener(view->{
-            Toast.makeText(getContext(),"no funciona",Toast.LENGTH_SHORT).show();
-            if (articles.getImage().equals(nameImage) &&
-                    articles.getName().equals(binding.nameEdt.getText().toString())
-                    && articles.getDescription().equals(binding.descriptionEdt.getText().toString())
-                    && articles.getPrice().equals(binding.priceEdt.getText().toString())){
-                Toast.makeText(getContext(),"funciona",Toast.LENGTH_SHORT).show();
-                deletePicture(articles);
-
-            }
-
+            builder = new AlertDialog.Builder(getContext());
+            builder.setTitle("Aviso")
+                    .setMessage("Deseas eliminar la informacion?")
+                    .setCancelable(true)
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Toast.makeText(getContext(),"no funciona",Toast.LENGTH_SHORT).show();
+                            if (articles.getImage().equals(nameImage) &&
+                                    articles.getName().equals(binding.nameEdt.getText().toString())
+                                    && articles.getDescription().equals(binding.descriptionEdt.getText().toString())
+                                    && articles.getPrice().equals(binding.priceEdt.getText().toString())){
+                                Toast.makeText(getContext(),"funciona",Toast.LENGTH_SHORT).show();
+                                deletePicture(articles);
+                            }
+                        }
+                    })
+                    .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.cancel();
+                        }
+                    })
+                    .show();
         });
         binding.clearBt.setOnClickListener(view->{
             binding.imageImageview.setImageDrawable(null);
