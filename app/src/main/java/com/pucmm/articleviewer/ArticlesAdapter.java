@@ -107,7 +107,7 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.Articl
         });
 
         holder.addToCart.setOnClickListener(view->{
-
+            Toast.makeText(view.getContext(),"Coming Soon",Toast.LENGTH_SHORT).show();
         });
         //
     }

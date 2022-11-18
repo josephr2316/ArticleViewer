@@ -226,7 +226,12 @@ public class AddItem extends Fragment {
                     Toast.makeText(getContext(),"Seleccione una imagen",Toast.LENGTH_SHORT).show();
             }
             else{
-                uploadPicture();
+                if (positionImage==-1)
+                    uploadPicture();
+                else{
+                    updatePicture(articles);
+
+                }
 
             }
 
@@ -427,25 +432,59 @@ public class AddItem extends Fragment {
         }
 
     }
-    public void updatePicture (Uri image){
+    public void updatePicture (Articles articles){
         SimpleDateFormat format = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.US);
         Date now = new Date();
         String fileName = format.format(now);
 
-        StorageReference storageRef = storageReference.child("images/" + fileName);
-        storageRef.putFile(image)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                Snackbar.make(binding.getRoot(),"Image Uploaded.",Snackbar.LENGTH_SHORT).show();
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception e) {
-                        Toast.makeText(getContext(),"Failed To Upload", Toast.LENGTH_SHORT);
+        if (fileName.equals(articles.getImage())
+                && binding.nameEdt.equals(articles.getName())
+                && binding.descriptionEdt.equals(articles.getDescription())
+                && binding.priceEdt.equals(articles.getPrice())){
 
-                    }
-                });
+        }
+        else{
+
+            binding.imageImageview.setDrawingCacheEnabled(true);
+            binding.imageImageview.buildDrawingCache();
+            Bitmap bitmap = ((BitmapDrawable) binding.imageImageview.getDrawable()).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
+
+            StorageReference storageRef = storageReference.child("images/" + fileName);
+
+            UploadTask uploadTask = storageRef.putBytes(data);
+
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Toast.makeText(getContext(),"Failed to changed", Toast.LENGTH_SHORT);
+
+                    // Handle unsuccessful uploads
+
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                    // ...
+                    Snackbar.make(binding.getRoot(),"Data changed.",Snackbar.LENGTH_SHORT).show();
+
+                    articles.setImage(fileName);
+                    articles.setName(binding.nameEdt.getText().toString());
+                    articles.setDescription(binding.descriptionEdt.getText().toString());
+                    articles.setPrice(binding.priceEdt.getText().toString());
+
+                    articleViewModel.updateArticles(articles);
+                    binding.imageImageview.setImageDrawable(null);
+                    binding.nameEdt.setText(null);
+                    binding.descriptionEdt.setText(null);
+                    binding.priceEdt.setText(null);
+
+                }
+            });
+        }
 
     }
 
