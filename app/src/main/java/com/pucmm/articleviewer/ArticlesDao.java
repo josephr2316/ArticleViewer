@@ -25,6 +25,9 @@ public interface ArticlesDao {
     @Query("SELECT * from articles_table")
     LiveData<List<Articles>> getAllArticles();
 
+    @Query("SELECT * FROM articles_table WHERE image = :image")
+    Articles findByImage(String image);
+
 
 
 

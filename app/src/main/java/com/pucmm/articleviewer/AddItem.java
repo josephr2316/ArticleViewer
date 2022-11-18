@@ -23,8 +23,10 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.room.Room;
 
 import android.provider.MediaStore;
+import android.telephony.RadioAccessSpecifier;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -52,14 +54,17 @@ import java.util.Locale;
 public class AddItem extends Fragment {
 
     FragmentAddItemBinding binding;
+    ArticlesAdapter adapter;
     ActivityResultLauncher<Intent> activityResultLauncher;
     private final int CAMERA_PERMISSION_CODE = 200;
     private final int GALLERY_PERMISSION_CODE = 201;
     private final int FOLDER_PERMISSION_CODE = 202;
     private int controller = 0;
     private FirebaseStorage storage;
+    Database db;
     private StorageReference storageReference;
     ArticleViewModel articleViewModel;
+    int positionImage;
 
 
 
@@ -81,25 +86,30 @@ public class AddItem extends Fragment {
     public void onViewCreated(@NonNull View viewAddItem, Bundle savedInstanceState) {
         super.onViewCreated(viewAddItem, savedInstanceState);
         String nameImage = AddItemArgs.fromBundle(getArguments()).getImage();
+        positionImage = AddItemArgs.fromBundle(getArguments()).getElement();
+
+        articleViewModel = new ViewModelProvider(this).get(ArticleViewModel.class);
+        db = Room.databaseBuilder(getContext(),
+                Database.class,"articles.db").allowMainThreadQueries().build();
+
+        Articles articles = db.articlesDao().findByImage(nameImage);
+
         if(TextUtils.isEmpty(nameImage)){
             binding.deleteBt.setVisibility(viewAddItem.GONE);
         }
         else{
             binding.deleteBt.setVisibility(viewAddItem.getVisibility());
-           //List<Articles> articlesList = (List<Articles>)articleViewModel.getAllArticles();
-            //Articles articles =  articleViewModel.getArticles(nameImage);
-//
-//                if (showValue.getImage()==nameImage){
-//                    selectPicture(showValue);
-//                }
-//
-//            }
+
+            if (articles.getImage().equals(nameImage))
+            {
+                Toast.makeText(getContext(),"bien",Toast.LENGTH_SHORT).show();
+                selectPicture(articles);
+            }
         }
 
 
         storage = FirebaseStorage.getInstance();
         storageReference = storage.getReference();
-        articleViewModel = new ViewModelProvider(this).get(ArticleViewModel.class);
 
         activityResultLauncher = registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), new ActivityResultCallback<ActivityResult>() {
             @Override
@@ -203,13 +213,17 @@ public class AddItem extends Fragment {
         });
 
         binding.saveBt.setOnClickListener(view->{
-            if(TextUtils.isEmpty(binding.nameEdt.getText()) || TextUtils.isEmpty(binding.descriptionEdt.getText()) || TextUtils.isEmpty(binding.priceEdt.getText())){
+            if(TextUtils.isEmpty(binding.nameEdt.getText()) || TextUtils.isEmpty(binding.descriptionEdt.getText())
+                    || TextUtils.isEmpty(binding.priceEdt.getText())
+                    ||binding.imageImageview.getDrawable() == null){
                 if (TextUtils.isEmpty(binding.nameEdt.getText()))
                     binding.nameEdt.setError("Digite el nombre del articulo");
                 if (TextUtils.isEmpty(binding.descriptionEdt.getText()))
                     binding.descriptionEdt.setError("Digite la descripcion");
                 if (TextUtils.isEmpty(binding.priceEdt.getText()))
                     binding.priceEdt.setError("Digite el precio");
+                if(binding.imageImageview.getDrawable() == null)
+                    Toast.makeText(getContext(),"Seleccione una imagen",Toast.LENGTH_SHORT).show();
             }
             else{
                 uploadPicture();
@@ -218,6 +232,15 @@ public class AddItem extends Fragment {
 
         });
         binding.deleteBt.setOnClickListener(view->{
+            Toast.makeText(getContext(),"no funciona",Toast.LENGTH_SHORT).show();
+            if (articles.getImage().equals(nameImage) &&
+                    articles.getName().equals(binding.nameEdt.getText().toString())
+                    && articles.getDescription().equals(binding.descriptionEdt.getText().toString())
+                    && articles.getPrice().equals(binding.priceEdt.getText().toString())){
+                Toast.makeText(getContext(),"funciona",Toast.LENGTH_SHORT).show();
+                deletePicture(articles);
+
+            }
 
         });
         binding.clearBt.setOnClickListener(view->{
@@ -332,23 +355,32 @@ public class AddItem extends Fragment {
         });
     }
 
-    public void deletePicture(String imageReceived){
+    public void deletePicture(Articles imageReceived){
         // Create a storage reference from our app
         StorageReference storageRef = storage.getReference();
 
 // Create a reference to the file to delete
-        StorageReference desertRef = storageRef.child("images/"+imageReceived);
+        StorageReference desertRef = storageRef.child("images/"+imageReceived.getImage());
 
 // Delete the file
         desertRef.delete().addOnSuccessListener(new OnSuccessListener<Void>() {
             @Override
             public void onSuccess(Void aVoid) {
                 // File deleted successfully
-                String image = imageReceived;
+                String image = imageReceived.getImage();
                 String name = binding.nameEdt.getText().toString();
                 String description = binding.descriptionEdt.getText().toString();
                 String price = binding.priceEdt.getText().toString();
+
                 articleViewModel.deleteArticles(new Articles(image,name,description,price));
+                binding.imageImageview.setImageDrawable(null);
+                binding.nameEdt.setText(null);
+                binding.descriptionEdt.setText(null);
+                binding.priceEdt.setText(null);
+                articleViewModel.deleteArticles(imageReceived);
+                binding.deleteBt.setVisibility(View.GONE);
+
+
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override
@@ -375,6 +407,9 @@ public class AddItem extends Fragment {
                             binding.nameEdt.setText(articles.getName());
                             binding.descriptionEdt.setText(articles.getDescription());
                             binding.priceEdt.setText(articles.getPrice());
+                            Toast.makeText(getContext(),articles.getName(), Toast.LENGTH_SHORT).show();
+
+                            Toast.makeText(getContext(),articles.getImage(), Toast.LENGTH_SHORT).show();
                             Toast.makeText(getContext(),"Downloaded", Toast.LENGTH_SHORT).show();
 
 

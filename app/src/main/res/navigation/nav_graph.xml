@@ -25,5 +25,8 @@
             android:name="image"
             app:argType="string"
             app:nullable="true" />
+        <argument
+            android:name="element"
+            app:argType="integer" />
     </fragment>
 </navigation>

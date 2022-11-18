@@ -51,7 +51,7 @@ public class Item extends Fragment {
 
         binding.addB.setOnClickListener(viewButton ->{
 
-            NavDirections navDirections = ItemDirections.actionItemToAddItem(null);
+            NavDirections navDirections = ItemDirections.actionItemToAddItem(null,-1);
             NavHostFragment.findNavController(Item.this)
                     .navigate(navDirections);
         });

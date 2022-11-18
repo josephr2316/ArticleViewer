@@ -45,6 +45,10 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.Articl
         this.articlesList = articlesList;
         notifyDataSetChanged();
     }
+    public void deleteElement(int position){
+        this.articlesList.remove(position);
+        notifyDataSetChanged();
+    }
 
     @NonNull
     @Override
@@ -95,7 +99,7 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.Articl
 //                    .addToBackStack(null)
 //                    .commit();
 
-            NavDirections navDirections = ItemDirections.actionItemToAddItem(image);
+            NavDirections navDirections = ItemDirections.actionItemToAddItem(image,position);
             NavController   navController = Navigation.findNavController(view);
             navController.navigate(navDirections);
 //            NavHostFragment.findNavController()
@@ -131,6 +135,7 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.Articl
             price = itemView.findViewById(R.id.price_cardview);
             addToCart = itemView.findViewById(R.id.add_to_cart_bt);
             edit = itemView.findViewById(R.id.edit_bt);
+
 
 
 
