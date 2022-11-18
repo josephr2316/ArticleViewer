@@ -54,7 +54,6 @@ import java.util.Locale;
 public class AddItem extends Fragment {
 
     FragmentAddItemBinding binding;
-    ArticlesAdapter adapter;
     ActivityResultLauncher<Intent> activityResultLauncher;
     private final int CAMERA_PERMISSION_CODE = 200;
     private final int GALLERY_PERMISSION_CODE = 201;
@@ -66,6 +65,7 @@ public class AddItem extends Fragment {
     ArticleViewModel articleViewModel;
     int positionImage;
     AlertDialog.Builder builder;
+    Articles saver;
 
 
 
@@ -103,7 +103,6 @@ public class AddItem extends Fragment {
 
             if (articles.getImage().equals(nameImage))
             {
-                Toast.makeText(getContext(),"bien",Toast.LENGTH_SHORT).show();
                 selectPicture(articles);
             }
         }
@@ -155,7 +154,6 @@ public class AddItem extends Fragment {
 
                                     }
                                     else{
-                                        Toast.makeText(getContext(), "you choose : " + cameraOptions[which],Toast.LENGTH_SHORT).show();
                                         Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                                         controller = 1;
                                         activityResultLauncher.launch(intentCamera);
@@ -174,7 +172,6 @@ public class AddItem extends Fragment {
 
                                     }
                                     else{
-                                        Toast.makeText(getContext(), "you choose : " + cameraOptions[which],Toast.LENGTH_SHORT).show();
                                         Intent intentFolder = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
                                         controller = 2;
                                         activityResultLauncher.launch(intentFolder);
@@ -193,7 +190,6 @@ public class AddItem extends Fragment {
 
                                     }
                                     else{
-                                        Toast.makeText(getContext(), "you choose : " + cameraOptions[which],Toast.LENGTH_SHORT).show();
                                         Intent intentFolder = new Intent(Intent.ACTION_GET_CONTENT);
                                         intentFolder.setType("image/*");
                                         controller = 2;
@@ -204,7 +200,6 @@ public class AddItem extends Fragment {
                                     break;
                                 case "Cancel":
                                     // code block
-                                    Toast.makeText(getContext(), "you choose : " + cameraOptions[which],Toast.LENGTH_SHORT).show();
 
                                     break;
                             }
@@ -215,16 +210,13 @@ public class AddItem extends Fragment {
 
         binding.saveBt.setOnClickListener(view->{
             if(TextUtils.isEmpty(binding.nameEdt.getText()) || TextUtils.isEmpty(binding.descriptionEdt.getText())
-                    || TextUtils.isEmpty(binding.priceEdt.getText())
-                    ||binding.imageImageview.getDrawable() == null){
+                    || TextUtils.isEmpty(binding.priceEdt.getText())){
                 if (TextUtils.isEmpty(binding.nameEdt.getText()))
                     binding.nameEdt.setError("Digite el nombre del articulo");
                 if (TextUtils.isEmpty(binding.descriptionEdt.getText()))
                     binding.descriptionEdt.setError("Digite la descripcion");
                 if (TextUtils.isEmpty(binding.priceEdt.getText()))
                     binding.priceEdt.setError("Digite el precio");
-                if(binding.imageImageview.getDrawable() == null)
-                    Toast.makeText(getContext(),"Seleccione una imagen",Toast.LENGTH_SHORT).show();
             }
             else{
                 if (positionImage==-1)
@@ -264,6 +256,7 @@ public class AddItem extends Fragment {
                     .show();
         });
         binding.clearBt.setOnClickListener(view->{
+            positionImage=-1;
             binding.imageImageview.setImageDrawable(null);
             binding.nameEdt.setText(null);
             binding.descriptionEdt.setText(null);
@@ -305,7 +298,7 @@ public class AddItem extends Fragment {
 
                 else {
                     //permission from popup was denied
-                    Toast.makeText(getContext(), "Permission 9denied...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Permission denied...", Toast.LENGTH_SHORT).show();
                 }
 
             }
@@ -321,7 +314,7 @@ public class AddItem extends Fragment {
                 }
                 else {
                     //permission from popup was denied
-                    Toast.makeText(getContext(), "Permission 9denied...", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(), "Permission denied...", Toast.LENGTH_SHORT).show();
                 }
             }
             break;
@@ -334,45 +327,49 @@ public class AddItem extends Fragment {
         Date now = new Date();
         String fileName = format.format(now);
 
-        binding.imageImageview.setDrawingCacheEnabled(true);
-        binding.imageImageview.buildDrawingCache();
-        Bitmap bitmap = ((BitmapDrawable) binding.imageImageview.getDrawable()).getBitmap();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
+        String image = fileName;
 
-        StorageReference storageRef = storageReference.child("images/" + fileName);
+        if (saver!=null){
 
-        UploadTask uploadTask = storageRef.putBytes(data);
-        Snackbar.make(binding.getRoot(),"here.",Snackbar.LENGTH_SHORT).show();
+        }
+        String name = binding.nameEdt.getText().toString();
+        String description = binding.descriptionEdt.getText().toString();
+        String price = binding.priceEdt.getText().toString();
+        saver = new Articles(image,name,description,price);
+        articleViewModel.insertArticles(saver);
+        Toast.makeText(getContext(),"Saved!!!", Toast.LENGTH_SHORT).show();
 
-        uploadTask.addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception exception) {
-                Toast.makeText(getContext(),"Failed To Upload", Toast.LENGTH_SHORT);
+        if(!(binding.imageImageview.getDrawable() == null)){
+            binding.imageImageview.setDrawingCacheEnabled(true);
+            binding.imageImageview.buildDrawingCache();
+            Bitmap bitmap = ((BitmapDrawable) binding.imageImageview.getDrawable()).getBitmap();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
 
-                // Handle unsuccessful uploads
+            StorageReference storageRef = storageReference.child("images/" + fileName);
 
-            }
-        }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                // ...
-                Snackbar.make(binding.getRoot(),"Image Uploaded.",Snackbar.LENGTH_SHORT).show();
+            UploadTask uploadTask = storageRef.putBytes(data);
 
-                String image = fileName;
-                String name = binding.nameEdt.getText().toString();
-                String description = binding.descriptionEdt.getText().toString();
-                String price = binding.priceEdt.getText().toString();
-                articleViewModel.insertArticles(new Articles(image,name,description,price));
-                binding.imageImageview.setImageDrawable(null);
-                binding.nameEdt.setText(null);
-                binding.descriptionEdt.setText(null);
-                binding.priceEdt.setText(null);
+            uploadTask.addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception exception) {
+                    Toast.makeText(getContext(),"Failed To Upload", Toast.LENGTH_SHORT).show();
 
-            }
-        });
+                    // Handle unsuccessful uploads
+
+                }
+            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                    // ...
+                    // Snackbar.make(binding.getRoot(),"Image Uploaded.",Snackbar.LENGTH_SHORT).show();
+                    Toast.makeText(getContext(),"Image Uploaded.", Toast.LENGTH_SHORT);
+                }
+            });
+        }
+
     }
 
     public void deletePicture(Articles imageReceived){
@@ -414,8 +411,10 @@ public class AddItem extends Fragment {
         StorageReference storageReference = FirebaseStorage.getInstance().getReference("images/"+ articles.getImage());
         try {
             File localfile = File.createTempFile("images","jpg");
-            Toast.makeText(getContext(),articles.getImage(), Toast.LENGTH_SHORT).show();
-            Toast.makeText(getContext(),"Downloaded---process", Toast.LENGTH_SHORT).show();
+            binding.nameEdt.setText(articles.getName());
+            binding.descriptionEdt.setText(articles.getDescription());
+            binding.priceEdt.setText(articles.getPrice());
+
 
             storageReference.getFile(localfile)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
@@ -424,15 +423,6 @@ public class AddItem extends Fragment {
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                             Bitmap bitmap = BitmapFactory.decodeFile(localfile.getAbsolutePath());
                             binding.imageImageview.setImageBitmap(bitmap);
-                            binding.nameEdt.setText(articles.getName());
-                            binding.descriptionEdt.setText(articles.getDescription());
-                            binding.priceEdt.setText(articles.getPrice());
-                            Toast.makeText(getContext(),articles.getName(), Toast.LENGTH_SHORT).show();
-
-                            Toast.makeText(getContext(),articles.getImage(), Toast.LENGTH_SHORT).show();
-                            Toast.makeText(getContext(),"Downloaded", Toast.LENGTH_SHORT).show();
-
-
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
@@ -448,57 +438,54 @@ public class AddItem extends Fragment {
 
     }
     public void updatePicture (Articles articles){
-        SimpleDateFormat format = new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss", Locale.US);
-        Date now = new Date();
-        String fileName = format.format(now);
 
-        if (fileName.equals(articles.getImage())
-                && binding.nameEdt.equals(articles.getName())
-                && binding.descriptionEdt.equals(articles.getDescription())
-                && binding.priceEdt.equals(articles.getPrice())){
+        if (controller==0
+                && binding.nameEdt.getText().toString().equals(articles.getName())
+                && binding.descriptionEdt.getText().toString().equals(articles.getDescription())
+                && binding.priceEdt.getText().toString().equals(articles.getPrice())){
 
         }
         else{
+            articles.setImage(articles.getName());
+            articles.setName(binding.nameEdt.getText().toString());
+            articles.setDescription(binding.descriptionEdt.getText().toString());
+            articles.setPrice(binding.priceEdt.getText().toString());
+            articleViewModel.updateArticles(articles);
+            Toast.makeText(getContext(),"Change saved", Toast.LENGTH_SHORT).show();
 
-            binding.imageImageview.setDrawingCacheEnabled(true);
-            binding.imageImageview.buildDrawingCache();
-            Bitmap bitmap = ((BitmapDrawable) binding.imageImageview.getDrawable()).getBitmap();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
+            if (controller!=0){
+                controller =0;
+                binding.imageImageview.setDrawingCacheEnabled(true);
+                binding.imageImageview.buildDrawingCache();
+                Bitmap bitmap = ((BitmapDrawable) binding.imageImageview.getDrawable()).getBitmap();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
 
-            StorageReference storageRef = storageReference.child("images/" + fileName);
+                StorageReference storageRef = storageReference.child("images/" + articles.getName());
 
-            UploadTask uploadTask = storageRef.putBytes(data);
+                UploadTask uploadTask = storageRef.putBytes(data);
 
-            uploadTask.addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception exception) {
-                    Toast.makeText(getContext(),"Failed to changed", Toast.LENGTH_SHORT);
+                uploadTask.addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        Toast.makeText(getContext(),"Failed to change", Toast.LENGTH_SHORT);
 
-                    // Handle unsuccessful uploads
+                        // Handle unsuccessful uploads
 
-                }
-            }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
-                    // ...
-                    Snackbar.make(binding.getRoot(),"Data changed.",Snackbar.LENGTH_SHORT).show();
+                    }
+                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // taskSnapshot.getMetadata() contains file metadata such as size, content-type, etc.
+                        // ...
+                        //Snackbar.make(binding.getRoot(),"Change saved",Snackbar.LENGTH_SHORT).show();
+                        Toast.makeText(getContext(),"Successfully upload image", Toast.LENGTH_SHORT).show();
 
-                    articles.setImage(fileName);
-                    articles.setName(binding.nameEdt.getText().toString());
-                    articles.setDescription(binding.descriptionEdt.getText().toString());
-                    articles.setPrice(binding.priceEdt.getText().toString());
 
-                    articleViewModel.updateArticles(articles);
-                    binding.imageImageview.setImageDrawable(null);
-                    binding.nameEdt.setText(null);
-                    binding.descriptionEdt.setText(null);
-                    binding.priceEdt.setText(null);
-
-                }
-            });
+                    }
+                });
+            }
         }
 
     }

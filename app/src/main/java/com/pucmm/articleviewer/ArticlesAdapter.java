@@ -135,19 +135,12 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.Articl
             price = itemView.findViewById(R.id.price_cardview);
             addToCart = itemView.findViewById(R.id.add_to_cart_bt);
             edit = itemView.findViewById(R.id.edit_bt);
-
-
-
-
         }
     }
     private void downloadImage(String image, ImageView imageView){
         StorageReference storageReference = FirebaseStorage.getInstance().getReference("images/"+ image);
         try {
             File localfile = File.createTempFile("images","jpg");
-            Toast.makeText(context.getApplicationContext(),image, Toast.LENGTH_SHORT).show();
-            Toast.makeText(context,"Downloaded---process", Toast.LENGTH_SHORT).show();
-
             storageReference.getFile(localfile)
                     .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
 
@@ -155,16 +148,10 @@ public class ArticlesAdapter extends RecyclerView.Adapter<ArticlesAdapter.Articl
                         public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
                            Bitmap bitmap = BitmapFactory.decodeFile(localfile.getAbsolutePath());
                            imageView.setImageBitmap(bitmap);
-                            Toast.makeText(context,"Downloaded", Toast.LENGTH_SHORT).show();
-
-
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override
                         public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(context,"Failed To Download", Toast.LENGTH_SHORT).show();
-
-
                         }
                     });
         } catch (IOException e) {

@@ -79,6 +79,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/price_edt"
+        app:layout_constraintVertical_bias="0.142"
         tools:ignore="TextContrastCheck,TextContrastCheck,TextContrastCheck,TextContrastCheck" />
 
     <Button
@@ -93,6 +94,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/clear_bt"
         app:layout_constraintTop_toBottomOf="@+id/price_edt"
+        app:layout_constraintVertical_bias="0.142"
         tools:ignore="TextContrastCheck,TextContrastCheck,TextContrastCheck,TextContrastCheck" />
 
     <Button
@@ -107,6 +109,7 @@
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toEndOf="@+id/save_bt"
         app:layout_constraintTop_toBottomOf="@+id/price_edt"
+        app:layout_constraintVertical_bias="0.142"
         tools:ignore="TextContrastCheck,TextContrastCheck,TextContrastCheck,TextContrastCheck,TextContrastCheck,TextContrastCheck" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
